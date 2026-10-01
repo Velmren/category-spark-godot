@@ -1,0 +1,10 @@
+.godot/
+.runtime/
+.qa-runtime/
+.qa-runtime-final/
+*.log
+*.avi
+*.mp4
+*.png
+
+output/

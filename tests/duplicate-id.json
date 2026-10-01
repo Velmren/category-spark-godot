@@ -1,0 +1,9 @@
+{
+  "format": "velmren-trivia-v1",
+  "categories": [
+    {"id":"sound","label":"Sound","questions":[
+      {"id":"same-id","prompt":"First?","options":["A","B"],"correct_index":0},
+      {"id":"same-id","prompt":"Second?","options":["A","B"],"correct_index":1}
+    ]}
+  ]
+}

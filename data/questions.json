@@ -1,0 +1,89 @@
+{
+  "format": "velmren-trivia-v1",
+  "categories": [
+    {
+      "id": "sound",
+      "label": "Sound & Rhythm",
+      "questions": [
+        {
+          "id": "sound-01",
+          "prompt": "Which unit measures frequency?",
+          "options": [
+            "Hertz",
+            "Lumens",
+            "Newtons",
+            "Bytes"
+          ],
+          "correct_index": 0
+        },
+        {
+          "id": "sound-02",
+          "prompt": "A steady repeated beat is called a…",
+          "options": [
+            "Pixel",
+            "Pulse",
+            "Vertex",
+            "Codec"
+          ],
+          "correct_index": 1
+        }
+      ]
+    },
+    {
+      "id": "web",
+      "label": "Web Basics",
+      "questions": [
+        {
+          "id": "web-01",
+          "prompt": "Which protocol normally secures a website connection?",
+          "options": [
+            "PNG",
+            "CSV",
+            "HTTPS",
+            "MIDI"
+          ],
+          "correct_index": 2
+        },
+        {
+          "id": "web-02",
+          "prompt": "Which language adds behavior to a web page?",
+          "options": [
+            "Markdown",
+            "JPEG",
+            "DNS",
+            "JavaScript"
+          ],
+          "correct_index": 3
+        }
+      ]
+    },
+    {
+      "id": "space",
+      "label": "Space",
+      "questions": [
+        {
+          "id": "space-01",
+          "prompt": "Which planet is known for its prominent rings?",
+          "options": [
+            "Mars",
+            "Saturn",
+            "Venus",
+            "Mercury"
+          ],
+          "correct_index": 1
+        },
+        {
+          "id": "space-02",
+          "prompt": "What is the name of our galaxy?",
+          "options": [
+            "Sombrero",
+            "Andromeda",
+            "Milky Way",
+            "Triangulum"
+          ],
+          "correct_index": 2
+        }
+      ]
+    }
+  ]
+}

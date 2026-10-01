@@ -1,0 +1,15 @@
+[application]
+config/name="Category Spark"
+run/main_scene="res://main.tscn"
+
+[display]
+window/size/viewport_width=900
+window/size/viewport_height=620
+window/size/window_width_override=900
+window/size/window_height_override=620
+window/stretch/mode="disabled"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.035, 0.047, 0.075, 1)

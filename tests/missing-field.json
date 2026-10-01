@@ -1,0 +1,8 @@
+{
+  "format": "velmren-trivia-v1",
+  "categories": [
+    {"id":"sound","label":"Sound","questions":[
+      {"id":"missing-prompt","options":["A","B"],"correct_index":0}
+    ]}
+  ]
+}
