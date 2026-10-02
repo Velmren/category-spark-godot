@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://5sffxpkuxp1r"
-path="res://.godot/imported/Rajdhani-Bold.ttf-ea69f988f763daf406e34905eff3a731.fontdata"
+uid="uid://b7y5xqsuhdfpx"
+path="res://.godot/imported/Gabarito-Variable.ttf-6f0ed4886475e25a83416640cdfde3ae.fontdata"
 
 [deps]
 
-source_file="res://assets/fonts/Rajdhani-Bold.ttf"
-dest_files=["res://.godot/imported/Rajdhani-Bold.ttf-ea69f988f763daf406e34905eff3a731.fontdata"]
+source_file="res://assets/fonts/Gabarito-Variable.ttf"
+dest_files=["res://.godot/imported/Gabarito-Variable.ttf-6f0ed4886475e25a83416640cdfde3ae.fontdata"]
 
 [params]
 

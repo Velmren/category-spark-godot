@@ -12,6 +12,7 @@ func _check(condition: bool, label: String) -> void:
 func _run() -> void:
     var scene = load("res://main.tscn").instantiate()
     root.add_child(scene)
+    scene.sfx.enabled = false
     await process_frame
 
     _check(scene.questions.size() == 6, "six questions loaded")
@@ -42,7 +43,7 @@ func _run() -> void:
     _check(not scene.restart_button.visible and scene.next_button.disabled and scene.answer_box.get_child_count() == 4, "restart restores first question")
 
     scene._answer(1)
-    _check(scene.score == 0 and scene.feedback_label.text == "Not quite. The answer is Hertz.", "incorrect answer feedback")
+    _check(scene.score == 0 and scene.verdict_label.text == "Not quite" and scene.feedback_label.text == "The answer is Hertz.", "incorrect answer feedback")
     _check(scene.answer_locked and not scene.next_button.disabled, "incorrect answer can advance")
 
     scene.queue_free()
