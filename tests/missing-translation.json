@@ -1,0 +1,9 @@
+{
+  "format": "velmren-trivia-v2",
+  "languages": ["en", "ru"],
+  "categories": [
+    {"id":"sound","label":{"en":"Sound","ru":"Звук"},"questions":[
+      {"id":"sound-01","prompt":{"en":"First?","ru":"Первый?"},"options":[{"en":"A","ru":"А"},{"en":"B"}],"correct_index":0}
+    ]}
+  ]
+}

@@ -1,7 +1,10 @@
 class_name TriviaImporter
 extends RefCounted
 
-const FORMAT := "velmren-trivia-v1"
+# v2 holds every language in one file; v1 files (plain strings) are still read
+# as single-language English sets.
+const FORMAT := "velmren-trivia-v2"
+const FORMAT_V1 := "velmren-trivia-v1"
 
 static func load_file(path: String) -> Dictionary:
     if not FileAccess.file_exists(path):
@@ -13,8 +16,19 @@ static func load_file(path: String) -> Dictionary:
     return validate(parsed)
 
 static func validate(root: Dictionary) -> Dictionary:
-    if root.get("format") != FORMAT:
-        return _fail("UNSUPPORTED_FORMAT")
+    var languages: Array = []
+    match root.get("format"):
+        FORMAT_V1:
+            languages = ["en"]
+        FORMAT:
+            languages = root.get("languages", [])
+            if typeof(languages) != TYPE_ARRAY or languages.is_empty():
+                return _fail("LANGUAGES_REQUIRED")
+            for language in languages:
+                if not _nonempty_string(language) or languages.count(language) > 1:
+                    return _fail("LANGUAGES_REQUIRED")
+        _:
+            return _fail("UNSUPPORTED_FORMAT")
     if not root.has("categories") or typeof(root.categories) != TYPE_ARRAY or root.categories.is_empty():
         return _fail("CATEGORIES_REQUIRED")
 
@@ -29,8 +43,11 @@ static func validate(root: Dictionary) -> Dictionary:
         var missing := _first_missing(category, ["id", "label", "questions"])
         if missing != "":
             return _fail("MISSING_CATEGORY_FIELD:" + missing)
-        if not _nonempty_string(category.id) or not _nonempty_string(category.label):
+        if not _nonempty_string(category.id):
             return _fail("INVALID_CATEGORY_TEXT")
+        var label = _localized(category.label, languages, category.id, "INVALID_CATEGORY_TEXT")
+        if label is String:
+            return _fail(label)
         if category_ids.has(category.id):
             return _fail("DUPLICATE_CATEGORY_ID:" + category.id)
         category_ids[category.id] = true
@@ -45,16 +62,22 @@ static func validate(root: Dictionary) -> Dictionary:
             missing = _first_missing(question, ["id", "prompt", "options", "correct_index"])
             if missing != "":
                 return _fail("MISSING_QUESTION_FIELD:" + missing)
-            if not _nonempty_string(question.id) or not _nonempty_string(question.prompt):
+            if not _nonempty_string(question.id):
                 return _fail("INVALID_QUESTION_TEXT")
+            var prompt = _localized(question.prompt, languages, question.id, "INVALID_QUESTION_TEXT")
+            if prompt is String:
+                return _fail(prompt)
             if question_ids.has(question.id):
                 return _fail("DUPLICATE_QUESTION_ID:" + question.id)
             question_ids[question.id] = true
             if typeof(question.options) != TYPE_ARRAY or question.options.size() < 2:
                 return _fail("OPTIONS_REQUIRED:" + question.id)
+            var options: Array = []
             for option in question.options:
-                if not _nonempty_string(option):
-                    return _fail("INVALID_OPTION:" + question.id)
+                var text = _localized(option, languages, question.id, "INVALID_OPTION:" + question.id)
+                if text is String:
+                    return _fail(text)
+                options.append(text)
             if typeof(question.correct_index) != TYPE_FLOAT and typeof(question.correct_index) != TYPE_INT:
                 return _fail("INVALID_CORRECT_INDEX:" + question.id)
             var answer_index := int(question.correct_index)
@@ -62,15 +85,37 @@ static func validate(root: Dictionary) -> Dictionary:
                 return _fail("INVALID_CORRECT_INDEX:" + question.id)
             questions.append({
                 "id": String(question.id),
-                "prompt": String(question.prompt),
-                "options": question.options.duplicate(),
+                "prompt": prompt,
+                "options": options,
                 "correct_index": answer_index,
                 "category_id": String(category.id),
-                "category_label": String(category.label)
+                "category_label": label
             })
-        normalized.append({"id": String(category.id), "label": String(category.label), "questions": questions})
+        normalized.append({"id": String(category.id), "label": label, "questions": questions})
 
-    return {"ok": true, "error": "", "data": {"format": FORMAT, "categories": normalized}}
+    return {"ok": true, "error": "", "data": {"format": root.format, "languages": languages.duplicate(), "categories": normalized}}
+
+# A text is either one string used in every language (names such as HTTPS) or an
+# object with a non-empty string for each language. Returns {language: text}, or
+# an error code as a String.
+static func _localized(value, languages: Array, owner: String, plain_error: String):
+    if typeof(value) == TYPE_STRING:
+        if not _nonempty_string(value):
+            return plain_error
+        var same := {}
+        for language in languages:
+            same[language] = String(value)
+        return same
+    if typeof(value) != TYPE_DICTIONARY:
+        return plain_error
+    var texts := {}
+    for language in languages:
+        if not value.has(language):
+            return "MISSING_TRANSLATION:%s:%s" % [owner, language]
+        if not _nonempty_string(value[language]):
+            return "INVALID_TRANSLATION:%s:%s" % [owner, language]
+        texts[language] = String(value[language])
+    return texts
 
 static func _first_missing(value: Dictionary, fields: Array) -> String:
     for field in fields:

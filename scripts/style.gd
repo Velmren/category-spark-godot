@@ -38,17 +38,35 @@ const FINALE := {
     "moon": Color("3d2b66"),
 }
 
+# Londrina Solid sets the wordmark and the numbers in every language. Londrina
+# and Gabarito have no Cyrillic, so Russian text uses Fira Sans Extra Condensed
+# Black and Onest, picked for the same weight and width.
 const DISPLAY := preload("res://assets/fonts/LondrinaSolid-Black.ttf")
+const DISPLAY_CYRILLIC := preload("res://assets/fonts/FiraSansExtraCondensed-Black.ttf")
 const TEXT_BASE := preload("res://assets/fonts/Gabarito-Variable.ttf")
+const TEXT_CYRILLIC := preload("res://assets/fonts/Onest-Variable.ttf")
 
+static var language := "en"
 static var _text_fonts := {}
 
-# Gabarito is a variable font; each weight (and optional tracking) is cached once.
+# Display face for the current language.
+static func display() -> Font:
+    return DISPLAY_CYRILLIC if language == "ru" else DISPLAY
+
+# Fira is drawn larger than Londrina at the same size; this evens out the headlines.
+static func display_size(font_size: int) -> int:
+    return int(round(font_size * (0.86 if language == "ru" else 1.0)))
+
+# Line spacing that keeps a wrapped headline tight in either face.
+static func display_leading(font_size: int) -> int:
+    return -int(round(font_size * (0.08 if language == "ru" else 0.2)))
+
+# Text faces are variable fonts; each weight (and optional tracking) is cached once.
 static func text(weight: int, tracking := 0) -> Font:
-    var key := Vector2i(weight, tracking)
+    var key := "%s-%d-%d" % [language, weight, tracking]
     if not _text_fonts.has(key):
         var variation := FontVariation.new()
-        variation.base_font = TEXT_BASE
+        variation.base_font = TEXT_CYRILLIC if language == "ru" else TEXT_BASE
         variation.variation_opentype = {TextServerManager.get_primary_interface().name_to_tag("wght"): weight}
         variation.spacing_glyph = tracking
         _text_fonts[key] = variation

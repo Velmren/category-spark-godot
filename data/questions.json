@@ -1,29 +1,30 @@
 {
-  "format": "velmren-trivia-v1",
+  "format": "velmren-trivia-v2",
+  "languages": ["en", "ru"],
   "categories": [
     {
       "id": "sound",
-      "label": "Sound & Rhythm",
+      "label": { "en": "Sound & Rhythm", "ru": "Звук и ритм" },
       "questions": [
         {
           "id": "sound-01",
-          "prompt": "Which unit measures frequency?",
+          "prompt": { "en": "Which unit measures frequency?", "ru": "В чём измеряют частоту?" },
           "options": [
-            "Hertz",
-            "Lumens",
-            "Newtons",
-            "Bytes"
+            { "en": "Hertz", "ru": "Герцы" },
+            { "en": "Lumens", "ru": "Люмены" },
+            { "en": "Newtons", "ru": "Ньютоны" },
+            { "en": "Bytes", "ru": "Байты" }
           ],
           "correct_index": 0
         },
         {
           "id": "sound-02",
-          "prompt": "A steady repeated beat is called a…",
+          "prompt": { "en": "A steady repeated beat is called a…", "ru": "Как называют ровный повторяющийся бит в музыке?" },
           "options": [
-            "Pixel",
-            "Pulse",
-            "Vertex",
-            "Codec"
+            { "en": "Pixel", "ru": "Пиксель" },
+            { "en": "Pulse", "ru": "Пульс" },
+            { "en": "Vertex", "ru": "Вершина" },
+            { "en": "Codec", "ru": "Кодек" }
           ],
           "correct_index": 1
         }
@@ -31,55 +32,45 @@
     },
     {
       "id": "web",
-      "label": "Web Basics",
+      "label": { "en": "Web Basics", "ru": "Основы веба" },
       "questions": [
         {
           "id": "web-01",
-          "prompt": "Which protocol normally secures a website connection?",
-          "options": [
-            "PNG",
-            "CSV",
-            "HTTPS",
-            "MIDI"
-          ],
+          "prompt": { "en": "Which protocol normally secures a website connection?", "ru": "Какой протокол обычно защищает соединение с сайтом?" },
+          "options": ["PNG", "CSV", "HTTPS", "MIDI"],
           "correct_index": 2
         },
         {
           "id": "web-02",
-          "prompt": "Which language adds behavior to a web page?",
-          "options": [
-            "Markdown",
-            "JPEG",
-            "DNS",
-            "JavaScript"
-          ],
+          "prompt": { "en": "Which language adds behavior to a web page?", "ru": "Какой язык оживляет веб-страницу?" },
+          "options": ["Markdown", "JPEG", "DNS", "JavaScript"],
           "correct_index": 3
         }
       ]
     },
     {
       "id": "space",
-      "label": "Space",
+      "label": { "en": "Space", "ru": "Космос" },
       "questions": [
         {
           "id": "space-01",
-          "prompt": "Which planet is known for its prominent rings?",
+          "prompt": { "en": "Which planet is known for its prominent rings?", "ru": "Какая планета знаменита своими кольцами?" },
           "options": [
-            "Mars",
-            "Saturn",
-            "Venus",
-            "Mercury"
+            { "en": "Mars", "ru": "Марс" },
+            { "en": "Saturn", "ru": "Сатурн" },
+            { "en": "Venus", "ru": "Венера" },
+            { "en": "Mercury", "ru": "Меркурий" }
           ],
           "correct_index": 1
         },
         {
           "id": "space-02",
-          "prompt": "What is the name of our galaxy?",
+          "prompt": { "en": "What is the name of our galaxy?", "ru": "Как называется наша галактика?" },
           "options": [
-            "Sombrero",
-            "Andromeda",
-            "Milky Way",
-            "Triangulum"
+            { "en": "Sombrero", "ru": "Сомбреро" },
+            { "en": "Andromeda", "ru": "Андромеда" },
+            { "en": "Milky Way", "ru": "Млечный Путь" },
+            { "en": "Triangulum", "ru": "Треугольник" }
           ],
           "correct_index": 2
         }

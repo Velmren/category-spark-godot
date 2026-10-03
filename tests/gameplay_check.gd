@@ -1,5 +1,7 @@
 extends SceneTree
 
+const TileButton = preload("res://scripts/tile_button.gd")
+
 var failed := false
 
 func _initialize() -> void:
@@ -13,6 +15,7 @@ func _run() -> void:
     var scene = load("res://main.tscn").instantiate()
     root.add_child(scene)
     scene.sfx.enabled = false
+    scene.set_language("en", false)
     await process_frame
 
     _check(scene.questions.size() == 6, "six questions loaded")
@@ -45,6 +48,19 @@ func _run() -> void:
     scene._answer(1)
     _check(scene.score == 0 and scene.verdict_label.text == "Not quite" and scene.feedback_label.text == "The answer is Hertz.", "incorrect answer feedback")
     _check(scene.answer_locked and not scene.next_button.disabled, "incorrect answer can advance")
+
+    # Switching language keeps the answered question as it was.
+    scene.set_language("ru", false)
+    await process_frame
+    _check(scene.question_label.text.replace("\u00a0", " ") == "В чём измеряют частоту?" and scene.answer_box.get_child(0).caption == "Герцы", "Russian question and answers")
+    _check(scene.verdict_label.text == "Мимо" and scene.feedback_label.text == "Правильный ответ: Герцы.", "Russian verdict")
+    _check(scene.answer_locked and scene.score == 0 and scene.answer_box.get_child(1).state == TileButton.State.WRONG and scene.answer_box.get_child(0).state == TileButton.State.CORRECT, "answer kept across the switch")
+    scene._next_question()
+    await process_frame
+    _check(scene.next_button.caption == "Следующий вопрос" and scene.question_label.text.replace("\u00a0", " ") == "Как называют ровный повторяющийся бит в музыке?", "next question in Russian")
+    scene.set_language("en", false)
+    await process_frame
+    _check(scene.question_label.text == "A steady repeated beat is called a…" and not scene.answer_locked, "back to English")
 
     scene.queue_free()
     await process_frame

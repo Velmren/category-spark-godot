@@ -1,8 +1,9 @@
 extends Control
 # Top bar: the wordmark with its spark, one progress pip per question grouped by
-# category, the score and the sound and motion switches.
+# category, the score, the sound and motion switches and the language switch.
 
 const Style = preload("res://scripts/style.gd")
+const Strings = preload("res://scripts/strings.gd")
 
 enum Mark { PENDING, CURRENT, CORRECT, WRONG }
 
@@ -14,6 +15,7 @@ var score_caption: Label
 var score_label: Label
 var sound_button: Button
 var motion_button: Button
+var language_buttons: Array[Button] = []
 
 var ink := Style.INK: set = set_ink
 var world: Dictionary = Style.FINALE
@@ -33,6 +35,7 @@ var _was_flicking := false
 var _ink_tween: Tween
 var _score_tween: Tween
 var _box := StyleBoxFlat.new()
+var _pips_shown := true
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -42,6 +45,11 @@ func _ready() -> void:
     score_label = _label("0", Style.DISPLAY)
     sound_button = _switch()
     motion_button = _switch()
+    for code in Strings.LANGUAGES:
+        var button := _switch()
+        button.text = code.to_upper()
+        button.set_meta("language", code)
+        language_buttons.append(button)
     set_ink(ink)
 
 func _label(text: String, font: Font) -> Label:
@@ -83,9 +91,23 @@ func set_ink(value: Color) -> void:
     score_label.add_theme_color_override("font_color", ink)
     score_caption.add_theme_color_override("font_color", ink)
     progress_label.add_theme_color_override("font_color", Color(ink, 0.72))
-    dress_switch(sound_button, sound_button.get_meta("on"))
-    dress_switch(motion_button, motion_button.get_meta("on"))
+    for button in [sound_button, motion_button] + language_buttons:
+        dress_switch(button, button.get_meta("on"))
     queue_redraw()
+
+# Text labels follow the current language; the wordmark and digits stay in Londrina.
+func refresh_fonts() -> void:
+    progress_label.add_theme_font_override("font", Style.text(700))
+    score_caption.add_theme_font_override("font", Style.text(700))
+    for button in [sound_button, motion_button] + language_buttons:
+        button.add_theme_font_override("font", Style.text(600))
+
+# Marks the current language; the switch is hidden when only one is available.
+func show_languages(current: String, available: Array) -> void:
+    for button in language_buttons:
+        var code: String = button.get_meta("language")
+        button.visible = available.size() > 1 and available.has(code)
+        dress_switch(button, code == current)
 
 func show_world(target: Dictionary, animated: bool) -> void:
     world = target
@@ -142,8 +164,9 @@ func _fit(label: Label, font_size: int) -> Vector2:
     label.size = label.get_minimum_size()
     return label.size
 
-# Shape values follow main.gd: 0 wide, 1 short, 2 tall.
-func arrange(shape: int, area: Vector2, side: float) -> void:
+# Shape values follow main.gd: 0 wide, 1 short, 2 tall. Returns the y where the
+# bar ends, so the question can start below it.
+func arrange(shape: int, area: Vector2, side: float) -> float:
     var tall := shape == 2
     var short := shape == 1
     var title_size := 23 if tall else (27 if short else 33)
@@ -155,16 +178,18 @@ func arrange(shape: int, area: Vector2, side: float) -> void:
     title_label.position = Vector2(side, middle - title.y * 0.5)
     _spark_unit = title_size / 33.0
     _spark_at = title_label.position + Vector2(title.x - 3.0 * _spark_unit, title.y * 0.5 - 30.0 * _spark_unit)
+    var title_end := title_label.position.x + title.x + 28.0 * _spark_unit
 
     var switch_size := 13 if tall else (14 if short else 15)
     var switch_height := 40.0 if shape == 0 else 44.0
-    for button in [sound_button, motion_button]:
+    var languages: Array = language_buttons.filter(func(button): return button.visible)
+    for button in [sound_button, motion_button] + language_buttons:
         button.add_theme_font_size_override("font_size", switch_size)
         for item in ["normal", "hover", "pressed"]:
             var pill: StyleBoxFlat = button.get_theme_stylebox(item)
-            pill.content_margin_left = 10.0 if tall else 13.0
+            pill.content_margin_left = 10.0 if tall or button.has_meta("language") else 13.0
             pill.content_margin_right = pill.content_margin_left
-        button.size = Vector2(button.get_minimum_size().x, switch_height)
+        button.size = Vector2(maxf(button.get_minimum_size().x, 44.0 if button.has_meta("language") else 0.0), switch_height)
 
     _pip = Vector2(22, 10) if tall else (Vector2(24, 10) if short else Vector2(30, 12))
     _pip_gap = 5.0 if tall else 7.0
@@ -172,25 +197,55 @@ func arrange(shape: int, area: Vector2, side: float) -> void:
     var pips_width := _pips_width()
     var number := _fit(score_label, 32 if tall or short else 38)
     var caption := _fit(score_caption, 17 if tall or short else 20)
-    _fit(progress_label, 15 if tall else 17)
-    progress_label.visible = not short
+    var progress := _fit(progress_label, 15 if tall else 17)
 
     if tall:
-        motion_button.position = Vector2(area.x - side - motion_button.size.x, middle - switch_height * 0.5)
-        sound_button.position = Vector2(motion_button.position.x - 8.0 - sound_button.size.x, motion_button.position.y)
-        var row := bar_top + bar_height + 26.0
-        _pips_at = Vector2(side, row - _pip.y * 0.5)
-        progress_label.position = Vector2(side + pips_width + 12.0, row - progress_label.size.y * 0.5)
-        score_label.position = Vector2(area.x - side - number.x, row - number.y * 0.5)
-        score_caption.position = Vector2(score_label.position.x - 7.0 - caption.x, row - caption.y * 0.5 + 2.0)
-    else:
-        score_label.position = Vector2(area.x - side - number.x, middle - number.y * 0.5)
-        score_caption.position = Vector2(score_label.position.x - 8.0 - caption.x, middle - caption.y * 0.5 + 3.0)
-        motion_button.position = Vector2(score_caption.position.x - 26.0 - motion_button.size.x, middle - switch_height * 0.5)
-        sound_button.position = Vector2(motion_button.position.x - 8.0 - sound_button.size.x, motion_button.position.y)
-        _pips_at = Vector2((area.x - pips_width) * 0.5, middle - _pip.y * 0.5)
-        progress_label.position = Vector2(_pips_at.x + pips_width + 14.0, middle - progress_label.size.y * 0.5)
+        # Row one: wordmark and language. Row two: switches and score. Row three: progress.
+        _place_row(languages, area.x - side, middle - switch_height * 0.5, 4.0)
+        var second := bar_top + bar_height + 30.0
+        sound_button.position = Vector2(side, second - switch_height * 0.5)
+        motion_button.position = Vector2(sound_button.position.x + sound_button.size.x + 8.0, sound_button.position.y)
+        score_label.position = Vector2(area.x - side - number.x, second - number.y * 0.5)
+        score_caption.position = Vector2(score_label.position.x - 7.0 - caption.x, second - caption.y * 0.5 + 2.0)
+        var third := second + 22.0 + 20.0
+        _pips_at = Vector2(side, third - _pip.y * 0.5)
+        _pips_shown = true
+        progress_label.visible = true
+        progress_label.position = Vector2(side + pips_width + 12.0, third - progress.y * 0.5)
+        queue_redraw()
+        return third + 14.0
+
+    score_label.position = Vector2(area.x - side - number.x, middle - number.y * 0.5)
+    score_caption.position = Vector2(score_label.position.x - 8.0 - caption.x, middle - caption.y * 0.5 + 3.0)
+    var x := _place_row(languages, score_caption.position.x - 24.0, middle - switch_height * 0.5, 4.0)
+    x -= 14.0 if not languages.is_empty() else 0.0
+    _place_row([sound_button, motion_button], x, middle - switch_height * 0.5, 8.0)
+    # Pips sit in the middle of the bar when there is room, otherwise in the gap
+    # the wordmark and the switches leave; the counter goes first when space is short.
+    var room_from := title_end + 16.0
+    var room_to := sound_button.position.x - 16.0
+    var with_counter := pips_width + 14.0 + progress.x
+    _pips_shown = room_to - room_from >= pips_width
+    progress_label.visible = not short and room_to - room_from >= with_counter
+    var group := with_counter if progress_label.visible else pips_width
+    var start := clampf((area.x - group) * 0.5, room_from, maxf(room_from, room_to - group))
+    _pips_at = Vector2(start, middle - _pip.y * 0.5)
+    progress_label.position = Vector2(start + pips_width + 14.0, middle - progress.y * 0.5)
+    if not _pips_shown and room_to - room_from >= progress.x:
+        progress_label.visible = true
+        progress_label.position = Vector2(room_from, middle - progress.y * 0.5)
     queue_redraw()
+    return bar_top + bar_height
+
+# Lays buttons out leftwards from `right`; returns the left edge of the row.
+func _place_row(buttons: Array, right: float, top: float, gap: float) -> float:
+    var x := right
+    for i in range(buttons.size() - 1, -1, -1):
+        var button: Button = buttons[i]
+        x -= button.size.x
+        button.position = Vector2(x, top)
+        x -= gap
+    return x + gap
 
 func _pips_width() -> float:
     var total := 0
@@ -210,6 +265,8 @@ func _draw() -> void:
         var to: Vector2 = _spark_at + (tick[1] + direction * 7.0 * flick) * _spark_unit
         Style.stroke(self, from, to, world.chip, 5.0 * _spark_unit)
 
+    if not _pips_shown:
+        return
     var x := _pips_at.x
     var index := 0
     for count in groups:

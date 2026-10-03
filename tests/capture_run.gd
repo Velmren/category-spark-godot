@@ -30,6 +30,7 @@ func _run() -> void:
     root.size = Vector2i(width, height)
     scene = load("res://main.tscn").instantiate()
     root.add_child(scene)
+    scene.set_language(OS.get_environment("CATEGORY_SPARK_LANG") if OS.get_environment("CATEGORY_SPARK_LANG") != "" else "en", false)
     await _pause(1.2)
     _check(root.get_texture().get_image().get_size() == Vector2i(width, height), "window renders %dx%d pixels" % [width, height])
     await _capture("start")
